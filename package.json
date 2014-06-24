@@ -1,0 +1,23 @@
+{
+  "name": "strider-msbuild-logger",
+  "version": "0.0.1",
+  "main": "index.js",
+  "description": "A logger for msbuild that can be used to colorize output for strider.",
+  "keywords": [
+    "strider",
+    "msbuild"
+  ],
+  "author": {
+    "name": "Abraham Heidebrecht"
+  },
+  "license": "GPL-2.0",
+  "readmeFilename": "Readme.md",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/abe545/strider-msbuild-logger.git"
+  },
+  "bugs": {
+    "url": "https://github.com/abe545/strider-msbuild-logger/issues"
+  },
+  "homepage": "https://github.com/abe545/strider-msbuild-logger"
+}

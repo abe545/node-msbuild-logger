@@ -1,7 +1,9 @@
 strider-msbuild-logger
-===================
+======================
 
-A logger for msbuild that can be used as an optional dependency. It outputs to stdout and stderr, and automatically colorizes its output.
+A logger for msbuild that can be used to prettify msbuild's output for strider. 
+It outputs to stdout and stderr, and automatically colorizes its output 
+(msbuild won't do so to buffers that are not consoles).
 
 Example usage: 
 
@@ -9,7 +11,7 @@ Example usage:
 var spawn = require('child_process').spawn;
 
 try {
-  var logger = require(msbuild-logger);
+  var logger = require(msbuild-logger)();
 } catch (err) {
   logger = null;
 }

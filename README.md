@@ -11,7 +11,7 @@ Example usage:
 var spawn = require('child_process').spawn;
 
 try {
-  var logger = require(msbuild-logger)();
+  var logger = require('strider-msbuild-logger')();
 } catch (err) {
   logger = null;
 }

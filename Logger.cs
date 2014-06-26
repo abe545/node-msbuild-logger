@@ -21,6 +21,7 @@ namespace Strider.MsBuild
         private readonly Queue<string> errors   = new Queue<string>();
         private readonly Queue<string> warnings = new Queue<string>();
         private          DateTime      startTime;
+        private          string        currentTarget;
 
         public LoggerVerbosity Verbosity  { get; set; }
         public string          Parameters { get; set; }
@@ -29,11 +30,13 @@ namespace Strider.MsBuild
         {
             eventSource.BuildStarted    += new BuildStartedEventHandler   (OnBuildStarted);
             eventSource.ProjectStarted  += new ProjectStartedEventHandler (OnProjectStarted);
+            eventSource.TargetStarted   += new TargetStartedEventHandler  (OnTargetStarted);
             eventSource.MessageRaised   += new BuildMessageEventHandler   (OnMessageRaised);
             eventSource.WarningRaised   += new BuildWarningEventHandler   (OnWarningRaised);
             eventSource.ErrorRaised     += new BuildErrorEventHandler     (OnErrorRaised);
             eventSource.ProjectFinished += new ProjectFinishedEventHandler(OnProjectFinished);
             eventSource.BuildFinished   += new BuildFinishedEventHandler  (OnBuildFinished);
+
         }
 
         public void Shutdown()
@@ -48,83 +51,93 @@ namespace Strider.MsBuild
 
         private void OnProjectStarted(object sender, ProjectStartedEventArgs e)
         {
-            Console.Write(infoPrefix);
-            Console.WriteLine("Building {0}", e.Message);
-            Console.Write(clearFormat);
+            var targets = e.TargetNames;
+            if (string.IsNullOrEmpty(targets))
+                targets = "default targets";
+
+            WriteLine(infoPrefix, "Project \"{0}\" ({1}).", e.ProjectFile, targets);
+        }
+
+        private void OnTargetStarted(object sender, TargetStartedEventArgs e)
+        {
+            currentTarget = e.TargetName;
+            
         }
 
         private void OnMessageRaised(object sender, BuildMessageEventArgs e)
         {
-            if (e.Importance == MessageImportance.Normal)
+            if (e.Importance == MessageImportance.High)
             {
-                Console.Write(verbosePrefix);
-                Console.WriteLine(e.Message);
-                Console.Write(clearFormat);
+                WriteLine(infoPrefix, "{0}:", currentTarget);
+                WriteLine(verbosePrefix, e.Message);
             }
         }
 
         private void OnWarningRaised(object sender, BuildWarningEventArgs e)
         {
-            Console.Write(warnPrefix);
             var warn = string.Format("{0}({1},{2}): warning {3}: {4}", e.File, e.LineNumber, e.ColumnNumber, e.Code, e.Message);
-            Console.WriteLine(warn);
             warnings.Enqueue(warn);
-            Console.Write(clearFormat);
+            WriteLine(warnPrefix, warn);
         }
 
         private void OnErrorRaised(object sender, BuildErrorEventArgs e)
         {
-            Console.Error.Write(errorPrefix);
             var err = string.Format("{0}({1},{2}): error {3}: {4}", e.File, e.LineNumber, e.ColumnNumber, e.Code, e.Message);
-            Console.Error.WriteLine(err);
             errors.Enqueue(err);
-            Console.Error.Write(clearFormat);
+            WriteError(err);
         }
 
         private void OnProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
             if (e.Succeeded)
-            {
-                Console.Write(successPrefix);
-                Console.WriteLine("{0}", e.Message);
-                Console.Write(clearFormat);
-            }
+                WriteLine(successPrefix, "{0}", e.Message);
             else
-            {
-                Console.Error.Write(errorPrefix);
-                Console.Error.WriteLine("{0}", e.Message);
-                Console.Error.Write(clearFormat);
-            }
+                WriteError(e.Message);
         }
 
         private void OnBuildFinished(object sender, BuildFinishedEventArgs e)
         {
-            Console.WriteLine(e.Message);
+            Console.WriteLine();
+            Console.WriteLine();
+            if (errors.Count > 0)
+                WriteLine(errorPrefix, e.Message);
+            else if (warnings.Count > 0)
+                WriteLine(warnPrefix, e.Message);
+            else
+                WriteLine(successPrefix, e.Message);
 
-            foreach(var s in errors)
-            {
-                Console.Write(errorPrefix);
-                Console.WriteLine(s);
-                Console.Write(clearFormat);
-            }
+            Console.WriteLine();
+
+            foreach (var s in errors)
+                WriteLine(errorPrefix, s);
             foreach (var s in warnings)
-            {
-                Console.Write(warnPrefix);
-                Console.WriteLine(s);
-                Console.Write(clearFormat);
-            }
+                WriteLine(warnPrefix, s);
+            
+            Console.WriteLine();
 
             if (warnings.Count > 0)
                 Console.Write(warnPrefix);
-            Console.WriteLine("{0} Warning(s)", warnings.Count);
-            Console.Write(clearFormat);
+            Console.Write("\t{0} Warning(s)", warnings.Count);
+            Console.WriteLine(clearFormat);
 
             if (errors.Count > 0)
                 Console.Write(errorPrefix);
-            Console.WriteLine("{0} Error(s)", errors.Count);
-            Console.Write(clearFormat);
+            Console.Write("\t{0} Error(s)", errors.Count);
+            Console.WriteLine(clearFormat);
 
             Console.WriteLine("Time Elapsed {0}", e.Timestamp - startTime);
+        }
+
+        private static void WriteLine(string colorCommand, string format, params object[] args)
+        {
+            Console.Write(colorCommand);
+            Console.Write(format, args);
+            Console.WriteLine(clearFormat);
+        }
+
+        private static void WriteError(string error)
+        {
+            Console.Error.WriteLine("{0}{1}{2}", errorPrefix, error, clearFormat);
         }
     }
 }

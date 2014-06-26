@@ -18,13 +18,23 @@ namespace Strider.MsBuild
         private const string verbosePrefix = "\u001b[37m";
         private const string clearFormat   = "\u001b[0m";
 
-        private readonly Queue<string> errors   = new Queue<string>();
-        private readonly Queue<string> warnings = new Queue<string>();
-        private          DateTime      startTime;
-        private          string        currentTarget;
+        private readonly Queue<string>   errors   = new Queue<string>();
+        private readonly Queue<string>   warnings = new Queue<string>();
+        private          DateTime        startTime;
+        private          string          currentTarget;
+        private          string          parameters;
+        private          LoggerVerbosity verbosity;
 
-        public LoggerVerbosity Verbosity  { get; set; }
-        public string          Parameters { get; set; }
+        public LoggerVerbosity Verbosity 
+        {
+            get { return verbosity; }
+            set { verbosity = value; }
+        }
+        public string Parameters
+        {
+            get { return parameters; }
+            set { parameters = value; }
+        }
 
         public void Initialize(IEventSource eventSource)
         {
@@ -51,7 +61,7 @@ namespace Strider.MsBuild
 
         private void OnProjectStarted(object sender, ProjectStartedEventArgs e)
         {
-            var targets = e.TargetNames;
+            string targets = e.TargetNames;
             if (string.IsNullOrEmpty(targets))
                 targets = "default targets";
 
@@ -75,14 +85,14 @@ namespace Strider.MsBuild
 
         private void OnWarningRaised(object sender, BuildWarningEventArgs e)
         {
-            var warn = string.Format("{0}({1},{2}): warning {3}: {4}", e.File, e.LineNumber, e.ColumnNumber, e.Code, e.Message);
+            string warn = string.Format("{0}({1},{2}): warning {3}: {4}", e.File, e.LineNumber, e.ColumnNumber, e.Code, e.Message);
             warnings.Enqueue(warn);
             WriteLine(warnPrefix, warn);
         }
 
         private void OnErrorRaised(object sender, BuildErrorEventArgs e)
         {
-            var err = string.Format("{0}({1},{2}): error {3}: {4}", e.File, e.LineNumber, e.ColumnNumber, e.Code, e.Message);
+            string err = string.Format("{0}({1},{2}): error {3}: {4}", e.File, e.LineNumber, e.ColumnNumber, e.Code, e.Message);
             errors.Enqueue(err);
             WriteError(err);
         }
@@ -108,9 +118,9 @@ namespace Strider.MsBuild
 
             Console.WriteLine();
 
-            foreach (var s in errors)
+            foreach (string s in errors)
                 WriteLine(errorPrefix, s);
-            foreach (var s in warnings)
+            foreach (string s in warnings)
                 WriteLine(warnPrefix, s);
             
             Console.WriteLine();

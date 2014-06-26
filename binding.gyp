@@ -9,12 +9,10 @@
 		  'action_name': 'compile',
 		  'inputs': [ 'logger.cs' ],
 		  'outputs': [ 'strider.msbuild.logger.dll' ],
-		  'message': 'csc logger.cs -out:strider.msbuild.logger.dll',
+		  'message': 'msbuild Strider.MsBuild.Logger.csproj',
 		  'conditions': [
             ['OS=="win"', {
-              'action': ['csc', '-target:library', '-out:..\\strider.msbuild.logger.dll', '-r:Microsoft.Build.Framework.dll', 'logger.cs']
-              }, {
-              'action': ['dmcs', '-sdk:2.0', '-target:library', '-out:..\\strider.msbuild.logger.dll', '-r:Microsoft.Build.Framework.dll', 'logger.cs']
+              'action': ['msbuild', 'Strider.MsBuild.Logger.csproj', '/nologo', '/tv:2.0', '/p:Configuration=Release']
               }
             ]
           ]

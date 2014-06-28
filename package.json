@@ -1,6 +1,6 @@
 {
   "name": "strider-msbuild-logger",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "index.js",
   "description": "A logger for msbuild that can be used to colorize output for strider.",
   "keywords": [

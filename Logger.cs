@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.Build.Framework;
 
-[assembly: AssemblyVersion("0.0.1.0")]
+[assembly: AssemblyVersion("0.1.1.0")]
 [assembly: AssemblyTitle("Strider MSBuild Logger")]
 
 namespace Strider.MsBuild
